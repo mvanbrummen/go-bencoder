@@ -22,7 +22,7 @@ type BeDict struct {
 }
 
 type BeDictEntry struct {
-	Key  string
+	Key  BeString
 	Node BeNode
 }
 

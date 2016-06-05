@@ -48,6 +48,7 @@ outer:
 
 func DecodeInteger(reader *bufio.Reader) *BeInteger {
 	var buf bytes.Buffer
+outer:
 	for {
 		if c, _, err := reader.ReadRune(); err != nil {
 			if err == io.EOF {
@@ -60,7 +61,7 @@ func DecodeInteger(reader *bufio.Reader) *BeInteger {
 			case 'i':
 				continue
 			case 'e':
-				break
+				break outer
 			default:
 				buf.WriteRune(c)
 			}

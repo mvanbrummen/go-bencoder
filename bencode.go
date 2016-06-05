@@ -47,28 +47,21 @@ outer:
 }
 
 func DecodeInteger(reader *bufio.Reader) *BeInteger {
-	var buf bytes.Buffer
-outer:
-	for {
-		if c, _, err := reader.ReadRune(); err != nil {
-			if err == io.EOF {
-				break
-			} else {
-				log.Fatal(err)
-			}
+	var str string
+	if b, err := reader.ReadBytes('e'); err != nil {
+		if err == io.EOF {
+			panic(err)
 		} else {
-			switch c {
-			case 'i':
-				continue
-			case 'e':
-				break outer
-			default:
-				buf.WriteRune(c)
-			}
+			log.Fatal(err)
+		}
+	} else {
+		str = fmt.Sprintf("%s", string(b[1:len(b)-1]))
+		if err != nil {
+			panic(err)
 		}
 	}
-	log.Printf("INFO: Decoded integer. Returning %v", BeInteger{buf.String()})
-	return &BeInteger{buf.String()}
+	log.Printf("INFO: Decoded integer. Returning %v", BeInteger{str})
+	return &BeInteger{str}
 }
 
 func DecodeString(reader *bufio.Reader) *BeString {

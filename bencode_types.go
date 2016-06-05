@@ -6,7 +6,7 @@ import (
 
 type BeString struct {
 	Len int
-	Val string
+	Val []byte
 }
 
 type BeInteger struct {

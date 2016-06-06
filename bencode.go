@@ -56,9 +56,6 @@ func DecodeInteger(reader *bufio.Reader) *BeInteger {
 		}
 	} else {
 		str = fmt.Sprintf("%s", string(b[1:len(b)-1]))
-		if err != nil {
-			panic(err)
-		}
 	}
 	log.Printf("INFO: Decoded integer. Returning %v", BeInteger{str})
 	return &BeInteger{str}

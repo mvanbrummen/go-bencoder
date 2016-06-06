@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"regexp"
 	"strconv"
 )
 
@@ -21,6 +22,7 @@ const (
 	Unicode7 byte = 55
 	Unicode8 byte = 56
 	Unicode9 byte = 57
+	BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
 )
 
 func BeDecode(reader io.Reader) {
@@ -56,6 +58,9 @@ func DecodeInteger(reader *bufio.Reader) *BeInteger {
 		}
 	} else {
 		str = fmt.Sprintf("%s", string(b[1:len(b)-1]))
+		if b, err := regexp.MatchString(BeIntPattern, str); err != nil || b == false {
+			panic(fmt.Sprintf("Could not parse integer: %s", str))
+		}
 	}
 	log.Printf("INFO: Decoded integer. Returning %v", BeInteger{str})
 	return &BeInteger{str}

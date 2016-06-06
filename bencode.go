@@ -11,17 +11,18 @@ import (
 )
 
 const (
-	Unicodei byte = 105
-	Unicode0 byte = 48
-	Unicode1 byte = 49
-	Unicode2 byte = 50
-	Unicode3 byte = 51
-	Unicode4 byte = 52
-	Unicode5 byte = 53
-	Unicode6 byte = 54
-	Unicode7 byte = 55
-	Unicode8 byte = 56
-	Unicode9 byte = 57
+	Unicodei     byte   = 105
+	Unicodel     byte   = 108
+	Unicode0     byte   = 48
+	Unicode1     byte   = 49
+	Unicode2     byte   = 50
+	Unicode3     byte   = 51
+	Unicode4     byte   = 52
+	Unicode5     byte   = 53
+	Unicode6     byte   = 54
+	Unicode7     byte   = 55
+	Unicode8     byte   = 56
+	Unicode9     byte   = 57
 	BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
 )
 
@@ -41,6 +42,8 @@ outer:
 				DecodeInteger(r)
 			case Unicode0, Unicode1, Unicode2, Unicode3, Unicode4, Unicode5, Unicode6, Unicode7, Unicode8, Unicode9:
 				DecodeString(r)
+			case Unicodel:
+				DecodeList(r)
 			default:
 				break outer
 			}
@@ -98,4 +101,32 @@ func DecodeString(reader *bufio.Reader) *BeString {
 	}
 	log.Printf("INFO: Decoded string. Returning %v in %v", buf.String(), BeString{length, buf.Bytes()})
 	return &BeString{length, buf.Bytes()}
+}
+
+func DecodeList(reader *bufio.Reader) *BeList {
+	var list BeList
+	reader.ReadByte()
+outer:
+	for {
+		if b, err := reader.Peek(1); err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				log.Fatal(err)
+			}
+		} else {
+			switch b[0] {
+			case Unicodei:
+				list.Node = append(list.Node, BeNode{DecodeInteger(reader)})
+			case Unicode0, Unicode1, Unicode2, Unicode3, Unicode4, Unicode5, Unicode6, Unicode7, Unicode8, Unicode9:
+				list.Node = append(list.Node, BeNode{DecodeString(reader)})
+			case Unicodel:
+				list.Node = append(list.Node, BeNode{DecodeList(reader)})
+			default:
+				break outer
+			}
+		}
+	}
+	fmt.Printf("List is: %v\n", list)
+	return &list
 }

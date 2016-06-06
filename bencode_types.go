@@ -27,5 +27,5 @@ type BeDictEntry struct {
 }
 
 type BeNode struct {
-	value interface{}
+	Val interface{}
 }

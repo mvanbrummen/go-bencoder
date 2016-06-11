@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	Unicoded		 byte   = 100
 	Unicodei     byte   = 105
 	Unicodel     byte   = 108
 	Unicode0     byte   = 48
@@ -44,6 +45,8 @@ outer:
 				DecodeString(r)
 			case Unicodel:
 				DecodeList(r)
+			case Unicoded:
+				DecodeDictionary(r)
 			default:
 				break outer
 			}
@@ -122,6 +125,8 @@ outer:
 				list.Node = append(list.Node, BeNode{DecodeString(reader)})
 			case Unicodel:
 				list.Node = append(list.Node, BeNode{DecodeList(reader)})
+			case Unicoded:
+				list.Node = append(list.Node, BeNode{DecodeDictionary(reader)})
 			default:
 				break outer
 			}
@@ -129,4 +134,47 @@ outer:
 	}
 	fmt.Printf("List is: %v\n", list)
 	return &list
+}
+
+func DecodeDictionary(reader *bufio.Reader) *BeDict {
+	var dict BeDict
+	reader.ReadByte()
+	for {
+		key, ok := getBencodeEntity(reader).(*BeString)
+		if key == nil {
+			break
+		}
+		if !ok {
+			log.Fatal("Dict key was not a string.")
+		}
+		value := BeNode{getBencodeEntity(reader)}
+		dict.Entry = append(dict.Entry, BeDictEntry{*key, value})
+	}
+	fmt.Printf("Dictionary is: %v\n", dict)
+	return &dict
+}
+
+func getBencodeEntity(reader *bufio.Reader) interface{} {
+	var bencodeEntity interface{}
+	if b, err := reader.Peek(1); err != nil {
+		if err == io.EOF {
+			return nil
+		} else {
+			log.Fatal(err)
+		}
+	} else {
+		switch b[0] {
+		case Unicodei:
+			bencodeEntity = DecodeInteger(reader)
+		case Unicode0, Unicode1, Unicode2, Unicode3, Unicode4, Unicode5, Unicode6, Unicode7, Unicode8, Unicode9:
+			bencodeEntity = DecodeString(reader)
+		case Unicodel:
+			bencodeEntity = DecodeList(reader)
+		case Unicoded:
+			bencodeEntity = DecodeDictionary(reader)
+		default:
+			bencodeEntity = nil
+		}
+	}
+	return bencodeEntity
 }

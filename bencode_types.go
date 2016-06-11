@@ -18,7 +18,7 @@ type BeList struct {
 }
 
 type BeDict struct {
-	Nodes []BeDictEntry
+	Entry []BeDictEntry
 }
 
 type BeDictEntry struct {

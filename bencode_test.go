@@ -8,38 +8,31 @@ import (
 
 type integerTestpair struct {
 	Value    []byte
-	Error    error
 	Expected *BeInteger
+}
+
+var integerTests = []integerTestpair{
+	{[]byte("i1e"), &BeInteger{"1"}},
+	{[]byte("i1345435e"), &BeInteger{"1345435"}},
+	{[]byte("i-1e"), &BeInteger{"-1"}},
+	{[]byte("i0e"), &BeInteger{"0"}},
 }
 
 type stringTestpair struct {
 	Value    []byte
-	Error    error
 	Expected *BeString
 }
 
-var integerTests = []integerTestpair{
-	{[]byte("i1e"), nil, &BeInteger{"1"}},
-	{[]byte("i1345435e"), nil, &BeInteger{"1345435"}},
-	{[]byte("i-1e"), nil, &BeInteger{"-1"}},
-	{[]byte("i0e"), nil, &BeInteger{"0"}},
-}
-
 var stringTests = []stringTestpair{
-	{[]byte("4:spam"), nil, &BeString{4, []byte("spam")}},
-	{[]byte("10:kickboxing"), nil, &BeString{10, []byte("kickboxing")}},
-	{[]byte("0:"), nil, &BeString{0, []byte("")}},
+	{[]byte("4:spam"), &BeString{4, []byte("spam")}},
+	{[]byte("10:kickboxing"), &BeString{10, []byte("kickboxing")}},
+	{[]byte("0:"), &BeString{0, []byte("")}},
 }
 
 func TestDecodeInteger(t *testing.T) {
 	for _, pair := range integerTests {
 		reader := bufio.NewReader(bytes.NewReader(pair.Value))
-		result, err := decodeInteger(reader)
-		if err != nil {
-			if err != pair.Error {
-				t.Error("For", pair.Value, "Expected", pair.Error, "Got", err)
-			}
-		}
+		result := decodeInteger(reader)
 		if result.Val != pair.Expected.Val {
 			t.Error("For", pair.Value, "Expected", pair.Expected.Val, "Got", result)
 		}
@@ -49,12 +42,7 @@ func TestDecodeInteger(t *testing.T) {
 func TestDecodeString(t *testing.T) {
 	for _, pair := range stringTests {
 		reader := bufio.NewReader(bytes.NewReader(pair.Value))
-		result, err := decodeString(reader)
-		if err != nil {
-			if err != pair.Error {
-				t.Error("For", pair.Value, "Expected", pair.Error, "Got", err)
-			}
-		}
+		result := decodeString(reader)
 		if string(result.Val) != string(pair.Expected.Val) {
 			t.Error("For", pair.Value, "Expected", pair.Expected.Val, "Got", string(result.Val))
 		}

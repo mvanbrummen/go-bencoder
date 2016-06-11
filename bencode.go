@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	Unicoded		 byte   = 100
+	Unicoded     byte   = 100
 	Unicodei     byte   = 105
 	Unicodel     byte   = 108
 	Unicode0     byte   = 48

@@ -1,7 +1,7 @@
 package main
 
 import (
-	_"fmt"
+	_ "fmt"
 )
 
 type BeString struct {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,5 +24,5 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error reading file\n")
 		os.Exit(1)
 	}
-	BeDecode(bytes.NewReader(b))
+	BeDecode(b)
 }

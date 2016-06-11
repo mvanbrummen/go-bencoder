@@ -28,11 +28,11 @@ const (
 	BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
 )
 
-func BeDecode(reader io.Reader) (interface{}, error) {
-	r := bufio.NewReader(reader)
+func BeDecode(b []byte) (interface{}, error) {
+	r := bufio.NewReader(bytes.NewReader(b))
 	var entity interface{}
 	for {
-		entity, err := DecodeEntity(r)
+		entity, err := decodeEntity(r)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +43,7 @@ func BeDecode(reader io.Reader) (interface{}, error) {
 	return entity, nil
 }
 
-func DecodeEntity(reader *bufio.Reader) (interface{}, error) {
+func decodeEntity(reader *bufio.Reader) (interface{}, error) {
 	var bencodeEntity interface{}
 	if b, err := reader.Peek(1); err != nil {
 		if err == io.EOF {
@@ -55,14 +55,14 @@ func DecodeEntity(reader *bufio.Reader) (interface{}, error) {
 		var err error
 		switch b[0] {
 		case Unicodei:
-			bencodeEntity, err = DecodeInteger(reader)
+			bencodeEntity, err = decodeInteger(reader)
 		case Unicode0, Unicode1, Unicode2, Unicode3, Unicode4, Unicode5, Unicode6,
 			Unicode7, Unicode8, Unicode9:
-			bencodeEntity, err = DecodeString(reader)
+			bencodeEntity, err = decodeString(reader)
 		case Unicodel:
-			bencodeEntity, err = DecodeList(reader)
+			bencodeEntity, err = decodeList(reader)
 		case Unicoded:
-			bencodeEntity, err = DecodeDictionary(reader)
+			bencodeEntity, err = decodeDictionary(reader)
 		default:
 			bencodeEntity = nil
 		}
@@ -73,7 +73,7 @@ func DecodeEntity(reader *bufio.Reader) (interface{}, error) {
 	return bencodeEntity, nil
 }
 
-func DecodeInteger(reader *bufio.Reader) (*BeInteger, error) {
+func decodeInteger(reader *bufio.Reader) (*BeInteger, error) {
 	var str string
 	if b, err := reader.ReadBytes('e'); err != nil {
 		if err == io.EOF {
@@ -89,7 +89,7 @@ func DecodeInteger(reader *bufio.Reader) (*BeInteger, error) {
 	return &BeInteger{str}, nil
 }
 
-func DecodeString(reader *bufio.Reader) (*BeString, error) {
+func decodeString(reader *bufio.Reader) (*BeString, error) {
 	var length int
 	// get the length of the BeString
 	if b, err := reader.ReadBytes(':'); err != nil {
@@ -120,11 +120,11 @@ func DecodeString(reader *bufio.Reader) (*BeString, error) {
 	return &BeString{length, buf.Bytes()}, nil
 }
 
-func DecodeList(reader *bufio.Reader) (*BeList, error) {
+func decodeList(reader *bufio.Reader) (*BeList, error) {
 	var list BeList
 	reader.ReadByte()
 	for {
-		value, err := DecodeEntity(reader)
+		value, err := decodeEntity(reader)
 		if err != nil {
 			return nil, err
 		}
@@ -137,11 +137,11 @@ func DecodeList(reader *bufio.Reader) (*BeList, error) {
 	return &list, nil
 }
 
-func DecodeDictionary(reader *bufio.Reader) (*BeDict, error) {
+func decodeDictionary(reader *bufio.Reader) (*BeDict, error) {
 	var dict BeDict
 	reader.ReadByte()
 	for {
-		keyEntity, err := DecodeEntity(reader)
+		keyEntity, err := decodeEntity(reader)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +152,7 @@ func DecodeDictionary(reader *bufio.Reader) (*BeDict, error) {
 		if !ok {
 			return nil, errors.New(fmt.Sprintf("Dictionary key was not a string: %v", key))
 		}
-		value, err := DecodeEntity(reader)
+		value, err := decodeEntity(reader)
 		if err != nil {
 			return nil, err
 		}

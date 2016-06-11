@@ -34,7 +34,7 @@ var stringTests = []stringTestpair{
 func TestDecodeInteger(t *testing.T) {
 	for _, pair := range integerTests {
 		reader := bufio.NewReader(bytes.NewReader(pair.Value))
-		result, err := DecodeInteger(reader)
+		result, err := decodeInteger(reader)
 		if err != nil {
 			if err != pair.Error {
 				t.Error("For", pair.Value, "Expected", pair.Error, "Got", err)
@@ -49,7 +49,7 @@ func TestDecodeInteger(t *testing.T) {
 func TestDecodeString(t *testing.T) {
 	for _, pair := range stringTests {
 		reader := bufio.NewReader(bytes.NewReader(pair.Value))
-		result, err := DecodeString(reader)
+		result, err := decodeString(reader)
 		if err != nil {
 			if err != pair.Error {
 				t.Error("For", pair.Value, "Expected", pair.Error, "Got", err)

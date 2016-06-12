@@ -24,5 +24,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error reading file\n")
 		os.Exit(1)
 	}
-	BeDecode(b)
+	entity, err := BeDecode(b)
+	fmt.Printf("Entity is %v\nErr is %v\n", entity, err)
 }

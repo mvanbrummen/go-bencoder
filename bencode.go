@@ -27,16 +27,40 @@ const (
 	BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
 )
 
-func BeDecode(b []byte) (interface{}, error) {
+func BeDecode(b []byte) (entity interface{}, err error) {
+	defer func() {
+		if ex := recover(); ex != nil {
+			err = fmt.Errorf("%v", ex)
+		}
+	}()
 	r := bufio.NewReader(bytes.NewReader(b))
-	var entity interface{}
-	for {
-		entity = decodeEntity(r)
-		if entity == nil {
-			break
+	entity = decodeEntity(r)
+	return entity, err
+}
+
+func decodeEntity(reader *bufio.Reader) interface{} {
+	var bencodeEntity interface{}
+	if b, err := reader.Peek(1); err != nil {
+		if err == io.EOF {
+			return nil
+		} else {
+			panic(err)
+		}
+	} else {
+		switch b[0] {
+		case Unicodei:
+			bencodeEntity = decodeInteger(reader)
+		case Unicode0, Unicode1, Unicode2, Unicode3, Unicode4, Unicode5, Unicode6, Unicode7, Unicode8, Unicode9:
+			bencodeEntity = decodeString(reader)
+		case Unicodel:
+			bencodeEntity = decodeList(reader)
+		case Unicoded:
+			bencodeEntity = decodeDictionary(reader)
+		default:
+			bencodeEntity = nil
 		}
 	}
-	return entity, nil
+	return bencodeEntity
 }
 
 func decodeInteger(reader *bufio.Reader) *BeInteger {
@@ -44,8 +68,6 @@ func decodeInteger(reader *bufio.Reader) *BeInteger {
 	if b, err := reader.ReadBytes('e'); err != nil {
 		if err == io.EOF {
 			panic(err)
-		} else {
-			log.Fatal(err)
 		}
 	} else {
 		str = fmt.Sprintf("%s", string(b[1:len(b)-1]))
@@ -63,8 +85,6 @@ func decodeString(reader *bufio.Reader) *BeString {
 	if b, err := reader.ReadBytes(':'); err != nil {
 		if err == io.EOF {
 			panic(err)
-		} else {
-			log.Fatal(err)
 		}
 	} else {
 		str := fmt.Sprintf("%s", string(b[:len(b)-1]))
@@ -80,7 +100,7 @@ func decodeString(reader *bufio.Reader) *BeString {
 			if err == io.EOF {
 				break
 			} else {
-				log.Fatal(err)
+				panic(err)
 			}
 		} else {
 			buf.WriteByte(b)
@@ -113,36 +133,11 @@ func decodeDictionary(reader *bufio.Reader) *BeDict {
 			break
 		}
 		if !ok {
-			log.Fatal("Dict key was not a string.")
+			panic("Dict key was not a string.")
 		}
 		value := BeNode{decodeEntity(reader)}
 		dict.Entry = append(dict.Entry, BeDictEntry{*key, value})
 	}
 	log.Printf("INFO: Decoded dictionary. Returning %v", dict)
 	return &dict
-}
-
-func decodeEntity(reader *bufio.Reader) interface{} {
-	var bencodeEntity interface{}
-	if b, err := reader.Peek(1); err != nil {
-		if err == io.EOF {
-			return nil
-		} else {
-			log.Fatal(err)
-		}
-	} else {
-		switch b[0] {
-		case Unicodei:
-			bencodeEntity = decodeInteger(reader)
-		case Unicode0, Unicode1, Unicode2, Unicode3, Unicode4, Unicode5, Unicode6, Unicode7, Unicode8, Unicode9:
-			bencodeEntity = decodeString(reader)
-		case Unicodel:
-			bencodeEntity = decodeList(reader)
-		case Unicoded:
-			bencodeEntity = decodeDictionary(reader)
-		default:
-			bencodeEntity = nil
-		}
-	}
-	return bencodeEntity
 }

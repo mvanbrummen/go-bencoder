@@ -10,16 +10,16 @@ const (
 )
 
 type BeNode struct {
-	String *BeString
-	Integer *BeInteger
-	List *BeList
+	String     *BeString
+	Integer    *BeInteger
+	List       *BeList
 	Dictionary *BeDict
-	Type BeType
+	Type       BeType
 }
 
 type BeString struct {
-		Len int
-		Val []byte
+	Len int
+	Val []byte
 }
 
 type BeInteger struct {

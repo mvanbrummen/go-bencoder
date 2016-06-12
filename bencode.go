@@ -68,7 +68,7 @@ func decodeEntity(reader *bufio.Reader) *BeNode {
 func decodeInteger(reader *bufio.Reader) *BeInteger {
 	var str string
 	if b, err := reader.ReadBytes('e'); err != nil {
-			panic(err)
+		panic(err)
 	} else {
 		str = fmt.Sprintf("%s", string(b[1:len(b)-1]))
 		if b, err := regexp.MatchString(BeIntPattern, str); err != nil || b == false {
@@ -83,7 +83,7 @@ func decodeString(reader *bufio.Reader) *BeString {
 	var length int
 	// get the length of the BeString
 	if b, err := reader.ReadBytes(':'); err != nil {
-			panic(err)
+		panic(err)
 	} else {
 		str := fmt.Sprintf("%s", string(b[:len(b)-1]))
 		length, err = strconv.Atoi(str)

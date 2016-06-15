@@ -58,6 +58,8 @@ func decodeEntity(reader *bufio.Reader) *BeNode {
 			bencodeEntity = BeNode{List: decodeList(reader), Type: BeListType}
 		case Unicoded:
 			bencodeEntity = BeNode{Dictionary: decodeDictionary(reader), Type: BeDictType}
+		case Unicodee:
+			reader.ReadByte()
 		default:
 			return nil
 		}
@@ -127,13 +129,16 @@ func decodeDictionary(reader *bufio.Reader) *BeDict {
 	reader.ReadByte()
 	for {
 		key := decodeEntity(reader)
-		if key == nil {
+		if key.Type != BeStringType {
+			panic("Dictionary key was not a string.")
+		}
+		if key.String == nil {
 			break
 		}
-		if key.Type != BeStringType {
-			panic("Dict key was not a string.")
-		}
 		v := decodeEntity(reader)
+		if v.IsNil() {
+			panic(fmt.Sprintf("Dictionary key '%s' does not have an associated value.", key.String.Val))
+		}
 		dict[string(key.String.Val)] = *v
 	}
 	log.Printf("INFO: Decoded dictionary. Returning %v", dict)

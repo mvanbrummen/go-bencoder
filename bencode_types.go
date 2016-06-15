@@ -17,6 +17,10 @@ type BeNode struct {
 	Type       BeType
 }
 
+func (b BeNode) IsNil() bool {
+	return b.String == nil && b.Integer == nil && b.List == nil && b.List == nil
+}
+
 type BeString struct {
 	Len int
 	Val []byte

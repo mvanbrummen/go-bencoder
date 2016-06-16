@@ -48,7 +48,6 @@ func decodeEntity(reader *bufio.Reader) *BeNode {
 			panic(err)
 		}
 	} else {
-		log.Printf("b is %s\n", string(b[0]))
 		switch b[0] {
 		case Unicodei:
 			bencodeEntity = BeNode{Integer: decodeInteger(reader), Type: BeIntegerType}
@@ -128,13 +127,16 @@ func decodeDictionary(reader *bufio.Reader) *BeDict {
 	var dict BeDict = make(BeDict)
 	reader.ReadByte()
 	for {
+		// get dictionary key
 		key := decodeEntity(reader)
-		if key.Type != BeStringType {
+		if key == nil {
+			break
+		} else if key.Type != BeStringType {
 			panic("Dictionary key was not a string.")
-		}
-		if key.String == nil {
+		} else if key.String == nil {
 			break
 		}
+		// get associated value
 		v := decodeEntity(reader)
 		if v.IsNil() {
 			panic(fmt.Sprintf("Dictionary key '%s' does not have an associated value.", key.String.Val))

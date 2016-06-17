@@ -129,19 +129,18 @@ func decodeDictionary(reader *bufio.Reader) *BeDict {
 	for {
 		// get dictionary key
 		key := decodeEntity(reader)
-		if key == nil {
+		if key == nil || key.String == nil {
 			break
 		} else if key.Type != BeStringType {
 			panic("Dictionary key was not a string.")
-		} else if key.String == nil {
-			break
+		} else {
+			// get associated value
+			v := decodeEntity(reader)
+			if v.IsNil() {
+				panic(fmt.Sprintf("Dictionary key '%s' does not have an associated value.", key.String.Val))
+			}
+			dict[string(key.String.Val)] = *v
 		}
-		// get associated value
-		v := decodeEntity(reader)
-		if v.IsNil() {
-			panic(fmt.Sprintf("Dictionary key '%s' does not have an associated value.", key.String.Val))
-		}
-		dict[string(key.String.Val)] = *v
 	}
 	log.Printf("INFO: Decoded dictionary. Returning %v", dict)
 	return &dict

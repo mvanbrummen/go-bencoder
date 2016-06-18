@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
@@ -24,6 +25,17 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error reading file\n")
 		os.Exit(1)
 	}
-	entity, err := BeDecode(b)
-	fmt.Printf("Entity is %v\nErr is %v\n", entity, err)
+	node, err := BeDecode(b)
+	if err != nil {
+		log.Printf(err.Error())
+		os.Exit(1)
+	}
+	fmt.Printf("Entity is %v\nErr is %v\n", node, err)
+	if node.Type != BeDictType {
+		panic("Not a dict!")
+	}
+	dict := node.Dictionary
+	for k, v := range *dict {
+		fmt.Printf("%s is %+v\n", k, v)
+	}
 }

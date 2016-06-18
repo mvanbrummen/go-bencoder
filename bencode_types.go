@@ -18,7 +18,7 @@ type BeNode struct {
 }
 
 func (b BeNode) IsNil() bool {
-	return b.String == nil && b.Integer == nil && b.List == nil && b.List == nil
+	return b.String == nil && b.Integer == nil && b.List == nil && b.Dictionary == nil
 }
 
 type BeString struct {

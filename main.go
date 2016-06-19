@@ -25,16 +25,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error reading file\n")
 		os.Exit(1)
 	}
-	node, err := BeDecode(b)
+	dict, err := BeDecode(b)
 	if err != nil {
 		log.Printf(err.Error())
 		os.Exit(1)
 	}
-	fmt.Printf("Entity is %v\nErr is %v\n", node, err)
-	if node.Type != BeDictType {
-		panic("Not a dict!")
-	}
-	dict := node.Dictionary
+	fmt.Printf("dict is %v\nErr is %v\n", dict, err)
 	for k, v := range *dict {
 		fmt.Printf("%s is %+v\n", k, v)
 	}

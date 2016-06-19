@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -28,15 +29,19 @@ const (
 	BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
 )
 
-func BeDecode(b []byte) (entity *BeNode, err error) {
+func BeDecode(b []byte) (dict *BeDict, err error) {
 	defer func() {
 		if ex := recover(); ex != nil {
 			err = fmt.Errorf("%v", ex)
 		}
 	}()
 	r := bufio.NewReader(bytes.NewReader(b))
-	entity = decodeEntity(r)
-	return entity, err
+	entity := decodeEntity(r)
+	if entity == nil || entity.Type != BeDictType {
+		err = errors.New("Root element was not a dictionary.")
+	}
+	dict = entity.Dictionary
+	return dict, err
 }
 
 func decodeEntity(reader *bufio.Reader) *BeNode {

@@ -119,7 +119,7 @@ func decodeList(reader *bufio.Reader) *BeList {
 	reader.ReadByte()
 	for {
 		value := decodeEntity(reader)
-		if value == nil {
+		if value == nil || value.IsNil() {
 			break
 		}
 		list = append(list, *value)

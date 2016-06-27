@@ -7,31 +7,31 @@ import (
 )
 
 type integerTestpair struct {
-	Value    []byte
+	Value    string
 	Expected *BeInteger
 }
 
 var integerTests = []integerTestpair{
-	{[]byte("i1e"), &BeInteger{"1"}},
-	{[]byte("i1345435e"), &BeInteger{"1345435"}},
-	{[]byte("i-1e"), &BeInteger{"-1"}},
-	{[]byte("i0e"), &BeInteger{"0"}},
+	{"i1e", NewBeInteger(1)},
+	{"i1345435e", NewBeInteger(1345435)},
+	{"i-1e", NewBeInteger(-1)},
+	{"i0e", NewBeInteger(0)},
 }
 
 type stringTestpair struct {
-	Value    []byte
+	Value    string
 	Expected *BeString
 }
 
 var stringTests = []stringTestpair{
-	{[]byte("4:spam"), &BeString{4, []byte("spam")}},
-	{[]byte("10:kickboxing"), &BeString{10, []byte("kickboxing")}},
-	{[]byte("0:"), &BeString{0, []byte("")}},
+	{"4:spam", NewBeString("spam")},
+	{"10:kickboxing", NewBeString("kickboxing")},
+	{"0:", NewBeString("")},
 }
 
 func TestDecodeInteger(t *testing.T) {
 	for _, pair := range integerTests {
-		reader := bufio.NewReader(bytes.NewReader(pair.Value))
+		reader := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
 		result := decodeInteger(reader)
 		if result.Val != pair.Expected.Val {
 			t.Error("For", pair.Value, "Expected", pair.Expected.Val, "Got", result)
@@ -41,7 +41,7 @@ func TestDecodeInteger(t *testing.T) {
 
 func TestDecodeString(t *testing.T) {
 	for _, pair := range stringTests {
-		reader := bufio.NewReader(bytes.NewReader(pair.Value))
+		reader := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
 		result := decodeString(reader)
 		if string(result.Val) != string(pair.Expected.Val) {
 			t.Error("For", pair.Value, "Expected", pair.Expected.Val, "Got", string(result.Val))

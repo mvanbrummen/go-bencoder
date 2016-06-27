@@ -42,7 +42,7 @@ func BeDecode(b []byte) (dict *BeDict, err error) {
 	r := bufio.NewReader(bytes.NewReader(b))
 	entity := *decodeEntity(r)
 	if entity == nil {
-		err = errors.New("Root element was not a dictionary.")
+		err = errors.New("Failed to parse bencoded data.")
 	}
 	d, ok := entity.(*BeDict)
 	if !ok {

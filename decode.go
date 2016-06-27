@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"regexp"
 	"strconv"
 )
@@ -89,7 +88,6 @@ func decodeInteger(reader *bufio.Reader) *BeInteger {
 			panic(fmt.Sprintf("Could not parse integer: %s", str))
 		}
 	}
-	log.Printf("INFO: Decoded integer. Returning %v", BeInteger{str})
 	return &BeInteger{str}
 }
 
@@ -118,7 +116,6 @@ func decodeString(reader *bufio.Reader) *BeString {
 			buf.WriteByte(b)
 		}
 	}
-	log.Printf("INFO: Decoded string. Returning %v in %v", buf.String(), BeString{length, buf.Bytes()})
 	return &BeString{length, buf.Bytes()}
 }
 
@@ -133,7 +130,6 @@ func decodeList(reader *bufio.Reader) *BeList {
 			list = append(list, *value)
 		}
 	}
-	log.Printf("INFO: Decoded list. Returning %v", list)
 	return &list
 }
 
@@ -158,6 +154,5 @@ func decodeDictionary(reader *bufio.Reader) *BeDict {
 			dict[string(k.Val)] = *v
 		}
 	}
-	log.Printf("INFO: Decoded dictionary. Returning %v", dict)
 	return &dict
 }

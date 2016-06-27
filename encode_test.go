@@ -16,11 +16,11 @@ var encodeTests = []encodeTestpair{
 	{NewBeInteger(0), "i0e"},
 	{NewBeInteger(-50), "i-50e"},
 	{NewBeInteger(123456), "i123456e"},
-  {&BeList{NewBeInteger(123456), NewBeString("spam")}, "li123456e4:spame"},
-  {&BeList{&BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}, "lli1ei2ei3eee"},
-  {&BeDict{"spam": NewBeInteger(3)}, "d4:spami3ee"},
-  {&BeDict{"spam": &BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}, "d4:spamli1ei2ei3eee"},
-  {&BeDict{"egg": &BeDict{"spam": &BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}}, "d3:eggd4:spamli1ei2ei3eeee"},
+	{&BeList{NewBeInteger(123456), NewBeString("spam")}, "li123456e4:spame"},
+	{&BeList{&BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}, "lli1ei2ei3eee"},
+	{&BeDict{"spam": NewBeInteger(3)}, "d4:spami3ee"},
+	{&BeDict{"spam": &BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}, "d4:spamli1ei2ei3eee"},
+	{&BeDict{"egg": &BeDict{"spam": &BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}}, "d3:eggd4:spamli1ei2ei3eeee"},
 }
 
 func TestEncode(t *testing.T) {

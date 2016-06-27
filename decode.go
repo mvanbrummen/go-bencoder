@@ -36,16 +36,20 @@ func BeDecode(b []byte) (dict *BeDict, err error) {
 		}
 	}()
 	r := bufio.NewReader(bytes.NewReader(b))
-	entity := decodeEntity(r)
-	if entity == nil || entity.Type != BeDictType {
+	entity := *decodeEntity(r)
+	if entity == nil {
 		err = errors.New("Root element was not a dictionary.")
 	}
-	dict = entity.Dictionary
+	d, ok := entity.(*BeDict)
+	if !ok {
+		err = errors.New("Root element was not a dictionary.")
+	}
+	dict = d
 	return dict, err
 }
 
-func decodeEntity(reader *bufio.Reader) *BeNode {
-	var bencodeEntity BeNode
+func decodeEntity(reader *bufio.Reader) *Bencoder {
+	var bencodeEntity Bencoder
 	if b, err := reader.Peek(1); err != nil {
 		if err == io.EOF {
 			return nil
@@ -55,13 +59,13 @@ func decodeEntity(reader *bufio.Reader) *BeNode {
 	} else {
 		switch b[0] {
 		case Unicodei:
-			bencodeEntity = BeNode{Integer: decodeInteger(reader), Type: BeIntegerType}
+			bencodeEntity = decodeInteger(reader)
 		case Unicode0, Unicode1, Unicode2, Unicode3, Unicode4, Unicode5, Unicode6, Unicode7, Unicode8, Unicode9:
-			bencodeEntity = BeNode{String: decodeString(reader), Type: BeStringType}
+			bencodeEntity = decodeString(reader)
 		case Unicodel:
-			bencodeEntity = BeNode{List: decodeList(reader), Type: BeListType}
+			bencodeEntity = decodeList(reader)
 		case Unicoded:
-			bencodeEntity = BeNode{Dictionary: decodeDictionary(reader), Type: BeDictType}
+			bencodeEntity = decodeDictionary(reader)
 		case Unicodee:
 			reader.ReadByte()
 		default:
@@ -119,10 +123,11 @@ func decodeList(reader *bufio.Reader) *BeList {
 	reader.ReadByte()
 	for {
 		value := decodeEntity(reader)
-		if value == nil || value.IsNil() {
+		if value == nil || *value == nil {
 			break
+		} else {
+			list = append(list, *value)
 		}
-		list = append(list, *value)
 	}
 	log.Printf("INFO: Decoded list. Returning %v", list)
 	return &list
@@ -134,17 +139,19 @@ func decodeDictionary(reader *bufio.Reader) *BeDict {
 	for {
 		// get dictionary key
 		key := decodeEntity(reader)
-		if key == nil || key.String == nil {
+		if key == nil || *key == nil {
 			break
-		} else if key.Type != BeStringType {
+		}
+		k, ok := (*key).(*BeString)
+		if !ok {
 			panic("Dictionary key was not a string.")
 		} else {
 			// get associated value
 			v := decodeEntity(reader)
-			if v.IsNil() {
-				panic(fmt.Sprintf("Dictionary key '%s' does not have an associated value.", key.String.Val))
+			if v == nil {
+				panic(fmt.Sprintf("Dictionary key '%s' does not have an associated value.", k.Val))
 			}
-			dict[string(key.String.Val)] = *v
+			dict[string(k.Val)] = *v
 		}
 	}
 	log.Printf("INFO: Decoded dictionary. Returning %v", dict)

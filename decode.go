@@ -12,20 +12,20 @@ import (
 )
 
 const (
-	Unicoded     byte   = 100
-	Unicodee     byte   = 101
-	Unicodei     byte   = 105
-	Unicodel     byte   = 108
-	Unicode0     byte   = 48
-	Unicode1     byte   = 49
-	Unicode2     byte   = 50
-	Unicode3     byte   = 51
-	Unicode4     byte   = 52
-	Unicode5     byte   = 53
-	Unicode6     byte   = 54
-	Unicode7     byte   = 55
-	Unicode8     byte   = 56
-	Unicode9     byte   = 57
+	Unicoded     byte   = 0x64
+	Unicodee     byte   = 0x65
+	Unicodei     byte   = 0x69
+	Unicodel     byte   = 0x6c
+	Unicode0     byte   = 0x30
+	Unicode1     byte   = 0x31
+	Unicode2     byte   = 0x32
+	Unicode3     byte   = 0x33
+	Unicode4     byte   = 0x34
+	Unicode5     byte   = 0x35
+	Unicode6     byte   = 0x36
+	Unicode7     byte   = 0x37
+	Unicode8     byte   = 0x38
+	Unicode9     byte   = 0x39
 	BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
 )
 

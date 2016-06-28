@@ -43,11 +43,10 @@ func BeDecode(b []byte) (dict *BeDict, err error) {
 	if entity == nil {
 		err = errors.New("Failed to parse bencoded data.")
 	}
-	d, ok := entity.(*BeDict)
+	dict, ok := entity.(*BeDict)
 	if !ok {
 		err = errors.New("Root element was not a dictionary.")
 	}
-	dict = d
 	return dict, err
 }
 

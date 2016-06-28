@@ -37,7 +37,7 @@ func TestEncode(t *testing.T) {
 }
 
 type encodeTestpair2 struct {
-	Value interface{}
+	Value    interface{}
 	Expected string
 }
 

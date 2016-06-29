@@ -14,25 +14,9 @@ import (
 	"strconv"
 )
 
-const (
-	Unicoded     byte   = 0x64
-	Unicodee     byte   = 0x65
-	Unicodei     byte   = 0x69
-	Unicodel     byte   = 0x6c
-	Unicode0     byte   = 0x30
-	Unicode1     byte   = 0x31
-	Unicode2     byte   = 0x32
-	Unicode3     byte   = 0x33
-	Unicode4     byte   = 0x34
-	Unicode5     byte   = 0x35
-	Unicode6     byte   = 0x36
-	Unicode7     byte   = 0x37
-	Unicode8     byte   = 0x38
-	Unicode9     byte   = 0x39
-	BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
-)
+const BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
 
-func BeDecode(b []byte) (dict *BeDict, err error) {
+func Unmarshal(b []byte) (dict *BeDict, err error) {
 	defer func() {
 		if ex := recover(); ex != nil {
 			err = fmt.Errorf("%v", ex)
@@ -60,15 +44,15 @@ func decodeEntity(reader *bufio.Reader) *Bencoder {
 		}
 	} else {
 		switch b[0] {
-		case Unicodei:
+		case 'i':
 			bencodeEntity = decodeInteger(reader)
-		case Unicode0, Unicode1, Unicode2, Unicode3, Unicode4, Unicode5, Unicode6, Unicode7, Unicode8, Unicode9:
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			bencodeEntity = decodeString(reader)
-		case Unicodel:
+		case 'l':
 			bencodeEntity = decodeList(reader)
-		case Unicoded:
+		case 'd':
 			bencodeEntity = decodeDictionary(reader)
-		case Unicodee:
+		case 'e':
 			reader.ReadByte()
 		default:
 			return nil

@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-func BeEncode(data interface{}) (bencoding []byte, err error) {
+func Marshal(data interface{}) (bencoding []byte, err error) {
 	defer func() {
 		if ex := recover(); ex != nil {
 			err = fmt.Errorf("%v", ex)

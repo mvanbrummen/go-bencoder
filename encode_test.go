@@ -50,7 +50,7 @@ var encodeTests2 = []encodeTestpair2{
 
 func TestEncodeInterface(t *testing.T) {
 	for _, pair := range encodeTests2 {
-		b, _ := BeEncode(pair.Value)
+		b, _ := Marshal(pair.Value)
 		if string(b) != pair.Expected {
 			t.Error("For", pair.Value, "Expected", pair.Expected, "Got", string(b))
 		}

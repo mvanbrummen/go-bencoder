@@ -16,26 +16,22 @@ import (
 
 const BeIntPattern string = "^(0|-[1-9]\\d*|[1-9]\\d*)$"
 
-func Unmarshal(b []byte) (dict *BeDict, err error) {
+func Unmarshal(b []byte) (entity interface{}, err error) {
 	defer func() {
 		if ex := recover(); ex != nil {
 			err = fmt.Errorf("%v", ex)
 		}
 	}()
 	r := bufio.NewReader(bytes.NewReader(b))
-	entity := *decodeEntity(r)
+	entity = decodeEntity(r)
 	if entity == nil {
 		err = errors.New("Failed to parse bencoded data.")
 	}
-	dict, ok := entity.(*BeDict)
-	if !ok {
-		err = errors.New("Root element was not a dictionary.")
-	}
-	return dict, err
+	return entity, err
 }
 
-func decodeEntity(reader *bufio.Reader) *Bencoder {
-	var bencodeEntity Bencoder
+func decodeEntity(reader *bufio.Reader) interface{} {
+	var bencodeEntity interface{}
 	if b, err := reader.Peek(1); err != nil {
 		if err == io.EOF {
 			return nil
@@ -58,23 +54,27 @@ func decodeEntity(reader *bufio.Reader) *Bencoder {
 			return nil
 		}
 	}
-	return &bencodeEntity
+	return bencodeEntity
 }
 
-func decodeInteger(reader *bufio.Reader) *BeInteger {
-	var str string
+func decodeInteger(reader *bufio.Reader) int64 {
+	var integer int64
 	if b, err := reader.ReadBytes('e'); err != nil {
 		panic(err)
 	} else {
-		str = fmt.Sprintf("%s", string(b[1:len(b)-1]))
+		str := fmt.Sprintf("%s", string(b[1:len(b)-1]))
 		if b, err := regexp.MatchString(BeIntPattern, str); err != nil || b == false {
 			panic(fmt.Sprintf("Could not parse integer: %s", str))
 		}
+		integer, err = strconv.ParseInt(str, 10, 64)
+		if err != nil {
+			panic(fmt.Sprintf("Could not convert integer: %s", str))
+		}
 	}
-	return &BeInteger{str}
+	return integer
 }
 
-func decodeString(reader *bufio.Reader) *BeString {
+func decodeString(reader *bufio.Reader) []byte {
 	var length int
 	// get the length of the BeString
 	if b, err := reader.ReadBytes(':'); err != nil {
@@ -99,43 +99,43 @@ func decodeString(reader *bufio.Reader) *BeString {
 			buf.WriteByte(b)
 		}
 	}
-	return &BeString{length, buf.Bytes()}
+	return buf.Bytes()
 }
 
-func decodeList(reader *bufio.Reader) *BeList {
-	var list BeList
+func decodeList(reader *bufio.Reader) []interface{} {
+	var list []interface{}
 	reader.ReadByte()
 	for {
 		value := decodeEntity(reader)
-		if value == nil || *value == nil {
+		if value == nil {
 			break
 		} else {
-			list = append(list, *value)
+			list = append(list, value)
 		}
 	}
-	return &list
+	return list
 }
 
-func decodeDictionary(reader *bufio.Reader) *BeDict {
-	var dict BeDict = make(BeDict)
+func decodeDictionary(reader *bufio.Reader) map[string]interface{} {
+	var dict map[string]interface{} = make(map[string]interface{})
 	reader.ReadByte()
 	for {
 		// get dictionary key
 		key := decodeEntity(reader)
-		if key == nil || *key == nil {
+		if key == nil {
 			break
 		}
-		k, ok := (*key).(*BeString)
+		k, ok := (key).([]byte)
 		if !ok {
 			panic("Dictionary key was not a string.")
 		} else {
 			// get associated value
 			v := decodeEntity(reader)
 			if v == nil {
-				panic(fmt.Sprintf("Dictionary key '%s' does not have an associated value.", k.Val))
+				panic(fmt.Sprintf("Dictionary key '%s' does not have an associated value.", k))
 			}
-			dict[string(k.Val)] = *v
+			dict[string(k)] = v
 		}
 	}
-	return &dict
+	return dict
 }

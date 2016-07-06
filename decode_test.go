@@ -10,90 +10,102 @@ import (
 	"testing"
 )
 
-type integerTestpair struct {
+type integerTestPair struct {
 	Value    string
-	Expected *BeInteger
+	Expected int64
 }
 
-var integerTests = []integerTestpair{
-	{"i1e", NewBeInteger(1)},
-	{"i1345435e", NewBeInteger(1345435)},
-	{"i-1e", NewBeInteger(-1)},
-	{"i0e", NewBeInteger(0)},
-}
-
-type stringTestpair struct {
-	Value    string
-	Expected *BeString
-}
-
-var stringTests = []stringTestpair{
-	{"4:spam", NewBeString("spam")},
-	{"10:kickboxing", NewBeString("kickboxing")},
-	{"0:", NewBeString("")},
-}
-
-type listTestpair struct {
-	Value    string
-	Expected *BeList
-}
-
-var listTests = []listTestpair{
-	{"l4:spami1ee", &BeList{NewBeString("spam"), NewBeInteger(1)}},
-	{"lli1ei2ei3eee", &BeList{&BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}},
-	{"le", &BeList{}},
-}
-
-type dictTestpair struct {
-	Value    string
-	Expected *BeDict
-}
-
-var dictTests = []dictTestpair{
-	{"d4:spami3ee", &BeDict{"spam": NewBeInteger(3)}},
-	{"d4:spamli1ei2ei3eee", &BeDict{"spam": &BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}},
-	{"d3:eggd4:spamli1ei2ei3eeee", &BeDict{"egg": &BeDict{"spam": &BeList{NewBeInteger(1), NewBeInteger(2), NewBeInteger(3)}}}},
+var integerTests = []integerTestPair{
+	{"i123e", 123},
+	{"i0e", 0},
+	{"i-123e", -123},
 }
 
 func TestDecodeInteger(t *testing.T) {
 	for _, pair := range integerTests {
-		reader := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
-		result := decodeInteger(reader)
-		if result.Val != pair.Expected.Val {
-			t.Error("For", pair.Value, "Expected", pair.Expected.Val, "Got", result)
+		r := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
+		i := decodeInteger(r)
+		if i != pair.Expected {
+			t.Error("For", pair.Value, "Expected", pair.Expected, "Got", i)
 		}
 	}
+}
+
+type stringTestPair struct {
+	Value    string
+	Expected []byte
+}
+
+var stringTests = []stringTestPair{
+	{"4:spam", []byte("spam")},
+	{"0:", []byte("")},
+	{"7:boourns", []byte("boourns")},
 }
 
 func TestDecodeString(t *testing.T) {
 	for _, pair := range stringTests {
-		reader := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
-		result := decodeString(reader)
-		if string(result.Val) != string(pair.Expected.Val) {
-			t.Error("For", pair.Value, "Expected", pair.Expected.Val, "Got", string(result.Val))
-		}
-		if result.Len != pair.Expected.Len {
-			t.Error("For", pair.Value, "Expected", pair.Expected.Len, "Got", result.Len)
+		r := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
+		s := decodeString(r)
+		if !bytes.Equal(s, pair.Expected) {
+			t.Error("For", pair.Value, "Expected", pair.Expected, "Got", s)
 		}
 	}
+}
+
+type listTestPair struct {
+	Value    string
+	Expected []interface{}
+}
+
+var listTests = []listTestPair{
+	{"li1ei2ei3ee", []interface{}{1, 2, 3}},
+	{"l4:spami222ee", []interface{}{[]byte("spam"), 222}},
+	{"li1eli2ei3ei4eee", []interface{}{1, []interface{}{2, 3, 4}}},
 }
 
 func TestDecodeList(t *testing.T) {
 	for _, pair := range listTests {
-		reader := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
-		result := decodeList(reader)
-		if len(*result) != len(*pair.Expected) {
-			t.Error("For", pair.Value, "Expected", len(*pair.Expected), "got", len(*result))
+		r := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
+		l := decodeList(r)
+		if len(l) != len(pair.Expected) {
+			t.Error("For", pair.Value, "Expected", pair.Expected, "Got", l)
 		}
 	}
 }
 
+func compareSlices(a, b []interface{}) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+type dictTestPair struct {
+	Value    string
+	Expected map[string]interface{}
+}
+
+var dictTests = []dictTestPair{
+	{"d4:spami123ee", map[string]interface{}{"spam": 123}},
+}
+
 func TestDecodeDictionary(t *testing.T) {
 	for _, pair := range dictTests {
-		reader := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
-		result := decodeDictionary(reader)
-		if len(*result) != len(*pair.Expected) {
-			t.Error("For", pair.Value, "Expected", len(*pair.Expected), "got", len(*result))
+		r := bufio.NewReader(bytes.NewReader([]byte(pair.Value)))
+		d := decodeDictionary(r)
+		if len(d) != len(pair.Expected) {
+			t.Error("For", pair.Value, "Expected", pair.Expected, "Got", d)
 		}
 	}
 }

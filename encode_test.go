@@ -15,6 +15,7 @@ type encodeTestpair2 struct {
 
 var encodeTests2 = []encodeTestpair2{
 	{"spam", "4:spam"},
+	{[]byte("spam"), "4:spam"},
 	{123, "i123e"},
 	{[]interface{}{"spam", 123}, "l4:spami123ee"},
 	{map[string]interface{}{"spam": 123}, "d4:spami123ee"},

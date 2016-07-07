@@ -24,6 +24,8 @@ func encodeEntity(data interface{}) []byte {
 	switch v := data.(type) {
 	case string:
 		buf.WriteString(fmt.Sprintf("%d:%s", len(v), v))
+	case []byte:
+		buf.WriteString(fmt.Sprintf("%d:%s", len(v), v))
 	case int, uint, int8, int16, int32, int64, uint8, uint16, uint32, uint64:
 		buf.WriteString(fmt.Sprintf("i%de", v))
 	case []interface{}:
